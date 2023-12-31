@@ -1,13 +1,21 @@
 import os
+import sys
 import requests
+import webbrowser, random, threading
 from flask import Flask, render_template, request, jsonify
 from combineImages import create_images
 from generateSlideshow import buildSlideshow
 from recap import butidRecap
 from datetime import datetime
 
-app = Flask(__name__, template_folder="templates")
 
+# weird macos thing
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    static_folder = os.path.join(sys._MEIPASS, 'static')
+    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+else:
+    app = Flask(__name__)
 
 # Acquire Phone Number from User
 def send_code(phone):
@@ -301,9 +309,15 @@ def preview():
 def failure():
     return render_template("failure.html")
 
-
+# choose a random port
+# open the port automatically
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = 5000 + random.randint(0, 999)
+    url = "http://127.0.0.1:{0}".format(port)
+
+    threading.Timer(1.25, lambda: webbrowser.open(url)).start()
+
+    app.run(port=port, debug=False)
 
 # otp_session = send_code()
 # tokenObj = verify(otp_session)
